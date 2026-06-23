@@ -2,6 +2,8 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using LogisticaApp.Data;
 using LogisticaApp.Middlewares;
@@ -42,14 +44,33 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Conductor", policy => policy.RequireRole("conductor"));
     options.AddPolicy("Operador", policy => policy.RequireRole("operador"));
     options.AddPolicy("Administrador", policy => policy.RequireRole("administrador"));
+    options.AddPolicy("OperadorOAdmin", policy => policy.RequireRole("operador", "administrador"));
 });
 
 // --- Services ---
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IConductorService, ConductorService>();
 
 // --- Controllers y OpenAPI ---
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, ct) =>
+    {
+        document.Components ??= new();
+        document.Components.SecuritySchemes = new Dictionary<string, OpenApiSecurityScheme>
+        {
+            ["Bearer"] = new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Description = "Ingresa tu JWT token"
+            }
+        };
+        return Task.CompletedTask;
+    });
+});
 
 var app = builder.Build();
 
@@ -61,6 +82,11 @@ if (app.Environment.IsDevelopment())
     {
         options.WithTitle("LogisticaApp API");
         options.AddServer(new ScalarServer("http://localhost:8080"));
+        options.WithPreferredScheme("Bearer");
+        options.WithHttpBearerAuthentication(bearer =>
+        {
+            bearer.Token = "tu-jwt-aqui";
+        });
     }).AllowAnonymous();
 }
 

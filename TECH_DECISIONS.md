@@ -1,3 +1,4 @@
+
 # Decisiones Técnicas — LogisticaApp
 
 Este archivo documenta las decisiones técnicas, versiones y errores conocidos del proyecto
