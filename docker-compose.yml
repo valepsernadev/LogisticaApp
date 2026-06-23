@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16
+    container_name: logistica_db
+    environment:
+      POSTGRES_USER: logistica_user
+      POSTGRES_PASSWORD: logistica_pass
+      POSTGRES_DB: logistica_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U logistica_user -d logistica_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: logistica_api
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=logistica_db;Username=logistica_user;Password=logistica_pass"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
