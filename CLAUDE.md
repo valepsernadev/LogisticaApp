@@ -30,7 +30,7 @@ PostgreSQL con init.sql. Sin migraciones.
 - Administrador: dashboards financieros y gestión de usuarios
 
 ## Reglas importantes
-- Nivel junior: código claro, sin abstracciones innecesarias
+- Nivel mid: código limpio, interfaces para servicios, principios SOLID sin sobreingeniería
 - Sin Repository Pattern
 - Sin migraciones de EF Core, usar init.sql
 - Documentación con Scalar, no Swagger
@@ -41,3 +41,11 @@ PostgreSQL con init.sql. Sin migraciones.
 ## Cómo correr el proyecto
 ```bash
 docker compose up --build
+```
+
+## Agentes
+Antes de escribir cualquier código lee el archivo correspondiente en `.claude/agents/`:
+- Para implementar código → lee `implementer.md`
+- Para revisar código → lee `reviewer.md`
+- Para base de datos → lee `db_agent.md`
+- Para planificar → lee `leader.md`
